@@ -1,0 +1,2 @@
+fred_api_key = "YOUR_FRED_API_KEY_HERE"
+github_repo  = "https://github.com/YangKuoshih/treasury-yield-summarizer"

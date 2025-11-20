@@ -17,7 +17,7 @@ variable "fred_api_key" {
 }
 
 variable "github_repo" {
-  description = "GitHub repository URL for Amplify (e.g., https://github.com/username/repo)"
+  description = "URL of the GitHub repository for Amplify"
   type        = string
-  default     = "" # User to provide if connecting Amplify
+  default     = "https://github.com/YangKuoshih/treasury-yield-summarizer"
 }
