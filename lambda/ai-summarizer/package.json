@@ -1,0 +1,9 @@
+{
+    "name": "ai-summarizer",
+    "version": "1.0.0",
+    "main": "index.mjs",
+    "type": "module",
+    "dependencies": {
+        "@aws-sdk/client-bedrock-runtime": "^3.0.0"
+    }
+}
