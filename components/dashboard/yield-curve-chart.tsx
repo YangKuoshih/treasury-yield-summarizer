@@ -15,10 +15,14 @@ interface YieldCurveChartProps {
 
 export function YieldCurveChart({ data, date, isLoading }: YieldCurveChartProps) {
   const chartData = useMemo(() => {
-    return data.map((item) => ({
-      maturity: item.maturity,
-      yield: item.yield,
-    }))
+    const order = ["1 Mo", "2 Mo", "3 Mo", "6 Mo", "1 Yr", "2 Yr", "3 Yr", "5 Yr", "7 Yr", "10 Yr", "20 Yr", "30 Yr"];
+    return data
+      .sort((a, b) => order.indexOf(a.maturity) - order.indexOf(b.maturity))
+      .map((item, index) => ({
+        maturity: item.maturity,
+        yield: item.yield,
+        order: index
+      }));
   }, [data])
 
   const isInverted = useMemo(() => {

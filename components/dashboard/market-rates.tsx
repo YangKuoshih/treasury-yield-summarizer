@@ -8,9 +8,11 @@ import type { TreasuryYield } from "@/lib/types"
 interface MarketRatesProps {
     yields: TreasuryYield[]
     isLoading: boolean
+    onSelectYield?: (yieldData: TreasuryYield) => void
+    selectedYield?: TreasuryYield | null
 }
 
-export function MarketRates({ yields, isLoading }: MarketRatesProps) {
+export function MarketRates({ yields, isLoading, onSelectYield, selectedYield }: MarketRatesProps) {
     return (
         <Card className="h-full">
             <CardHeader>
@@ -35,7 +37,11 @@ export function MarketRates({ yields, isLoading }: MarketRatesProps) {
                             ))
                         ) : yields.length > 0 ? (
                             yields.map((item) => (
-                                <TableRow key={item.maturity}>
+                                <TableRow 
+                                    key={item.maturity}
+                                    className={`cursor-pointer hover:bg-muted/50 ${selectedYield?.maturity === item.maturity ? 'bg-primary/10' : ''}`}
+                                    onClick={() => onSelectYield?.(item)}
+                                >
                                     <TableCell className="font-medium">{item.maturity}</TableCell>
                                     <TableCell className="text-right">{item.yield.toFixed(2)}%</TableCell>
                                 </TableRow>

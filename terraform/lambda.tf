@@ -170,3 +170,25 @@ resource "aws_lambda_permission" "allow_cloudwatch_news" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.daily_news_fetch.arn
 }
+
+data "archive_file" "yield_summary_zip" {
+  type        = "zip"
+  source_dir  = "${path.module}/../lambda/yield-summary"
+  output_path = "${path.module}/yield-summary.zip"
+}
+
+resource "aws_lambda_function" "yield_summary" {
+  filename         = data.archive_file.yield_summary_zip.output_path
+  function_name    = "${var.project_name}-yield-summary"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "index.handler"
+  source_code_hash = data.archive_file.yield_summary_zip.output_base64sha256
+  runtime          = "nodejs20.x"
+  timeout          = 60
+
+  environment {
+    variables = {
+      MODEL_ID = "anthropic.claude-4-5-sonnet-20250220-v1:0"
+    }
+  }
+}

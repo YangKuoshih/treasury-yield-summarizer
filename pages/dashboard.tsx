@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { YieldCurveChart } from "@/components/dashboard/yield-curve-chart";
 import { MarketRates } from "@/components/dashboard/market-rates";
-import { AISummaryPanel } from "@/components/dashboard/ai-summary-panel";
+import { YieldSpecificSummary } from "@/components/dashboard/yield-specific-summary";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { RefreshCw, LogOut } from "lucide-react";
 import type { TreasuryYield } from "@/lib/types";
@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [selectedYield, setSelectedYield] = useState<TreasuryYield | null>(null);
 
   const fetchYields = async () => {
     try {
@@ -95,12 +96,14 @@ export default function DashboardPage() {
           <MarketRates 
             yields={yields}
             isLoading={isLoading}
+            onSelectYield={setSelectedYield}
+            selectedYield={selectedYield}
           />
         </div>
 
-        {/* AI Summary Panel */}
+        {/* Yield-Specific AI Summary */}
         <div className="mt-6">
-          <AISummaryPanel yields={yields} />
+          <YieldSpecificSummary selectedYield={selectedYield} />
         </div>
       </main>
     </div>

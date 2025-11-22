@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { YieldCurveChart } from "@/components/dashboard/yield-curve-chart";
 import { MarketRates } from "@/components/dashboard/market-rates";
+import { YieldSpecificSummary } from "@/components/dashboard/yield-specific-summary";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ArrowLeft } from "lucide-react";
 import type { TreasuryYield } from "@/lib/types";
@@ -25,6 +26,7 @@ const sampleYields: TreasuryYield[] = [
 
 export default function DemoPage() {
   const [isLoading] = useState(false);
+  const [selectedYield, setSelectedYield] = useState<TreasuryYield | null>(null);
   const currentDate = new Date().toISOString().split('T')[0];
 
   return (
@@ -76,11 +78,18 @@ export default function DemoPage() {
           <MarketRates 
             yields={sampleYields}
             isLoading={isLoading}
+            onSelectYield={setSelectedYield}
+            selectedYield={selectedYield}
           />
         </div>
 
+        {/* Yield-Specific AI Summary */}
+        <div className="mt-6">
+          <YieldSpecificSummary selectedYield={selectedYield} />
+        </div>
+
         {/* Demo Notice */}
-        <div className="mt-8 rounded-lg border border-blue-200 bg-blue-50 p-6">
+        <div className="mt-8 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950 p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-2">Demo Features</h3>
           <ul className="text-blue-800 space-y-1 mb-4">
             <li>• Interactive yield curve visualization</li>

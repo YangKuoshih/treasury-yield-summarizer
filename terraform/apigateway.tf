@@ -57,3 +57,24 @@ resource "aws_lambda_permission" "api_gw_yield" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/fetch-yields"
 }
+
+# Integration for Yield Summary
+resource "aws_apigatewayv2_integration" "yield_summary" {
+  api_id           = aws_apigatewayv2_api.http_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.yield_summary.invoke_arn
+}
+
+resource "aws_apigatewayv2_route" "yield_summary" {
+  api_id    = aws_apigatewayv2_api.http_api.id
+  route_key = "POST /yield-summary"
+  target    = "integrations/${aws_apigatewayv2_integration.yield_summary.id}"
+}
+
+resource "aws_lambda_permission" "api_gw_yield_summary" {
+  statement_id  = "AllowExecutionFromAPIGatewayYieldSummary"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.yield_summary.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.http_api.execution_arn}/*/*/yield-summary"
+}
