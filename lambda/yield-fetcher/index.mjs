@@ -70,12 +70,22 @@ export const handler = async (event) => {
 
         return {
             statusCode: 200,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "POST, OPTIONS"
+            },
             body: JSON.stringify({ message: "Yield data updated successfully", data: item }),
         };
     } catch (error) {
         console.error("Error:", error);
         return {
             statusCode: 500,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "POST, OPTIONS"
+            },
             body: JSON.stringify({ error: "Internal Server Error", details: error.message }),
         };
     }

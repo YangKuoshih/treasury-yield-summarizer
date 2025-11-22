@@ -42,7 +42,7 @@ export default function DemoPage() {
               </Button>
               <h1 className="text-2xl font-bold">Treasury Yield Demo</h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <div className="rounded-full bg-green-100 dark:bg-green-900 px-3 py-1 text-xs font-medium text-green-800 dark:text-green-200">
                 Demo Mode
               </div>

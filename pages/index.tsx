@@ -7,8 +7,14 @@ import { TrendingUp, BarChart3, Sparkles, Shield } from "lucide-react";
 export default function HomePage() {
     return (
         <div className="min-h-screen bg-background">
+            {/* Header */}
+            <header className="border-b">
+                <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-end">
+                    <ThemeToggle />
+                </div>
+            </header>
             {/* Hero Section */}
-            <section className="relative overflow-hidden border-b">
+            <section className="relative overflow-hidden">
                 <div className="container mx-auto px-4 py-24 sm:px-6 lg:px-8">
                     <div className="mx-auto max-w-3xl text-center">
                         <h1 className="text-balance text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
@@ -18,7 +24,6 @@ export default function HomePage() {
                             Real-time U.S. Treasury yield analysis powered by AI. Track yield curves, analyze trends, and get intelligent summaries from the Federal Reserve Economic Data.
                         </p>
                         <div className="mt-10 flex items-center justify-center gap-4">
-                            <ThemeToggle />
                             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
                                 <Link href="/login">Get Started</Link>
                             </Button>

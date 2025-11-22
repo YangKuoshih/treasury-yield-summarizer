@@ -14,6 +14,11 @@ export const handler = async (event) => {
         if (!yields || !Array.isArray(yields) || yields.length === 0) {
             return {
                 statusCode: 400,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Headers": "Content-Type",
+                    "Access-Control-Allow-Methods": "POST, OPTIONS"
+                },
                 body: JSON.stringify({ error: "Invalid yield data provided" }),
             };
         }
@@ -90,6 +95,11 @@ export const handler = async (event) => {
 
         return {
             statusCode: 200,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "POST, OPTIONS"
+            },
             body: JSON.stringify({
                 ...jsonResponse,
                 generatedAt: new Date().toISOString()
@@ -99,6 +109,11 @@ export const handler = async (event) => {
         console.error("Error:", error);
         return {
             statusCode: 500,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "POST, OPTIONS"
+            },
             body: JSON.stringify({ error: "Internal Server Error", details: error.message }),
         };
     }

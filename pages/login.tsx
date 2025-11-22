@@ -26,12 +26,14 @@ export default function LoginPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="mb-6 flex items-center justify-between">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
-            </Link>
-          </Button>
+          <div>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Link>
+            </Button>
+          </div>
           <ThemeToggle />
         </div>
 
