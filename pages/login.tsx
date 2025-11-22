@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
@@ -24,13 +25,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <Button asChild variant="ghost" size="sm">
             <Link href="/">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Link>
           </Button>
+          <ThemeToggle />
         </div>
 
         <Card>

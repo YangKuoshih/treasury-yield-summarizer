@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { YieldCurveChart } from "@/components/dashboard/yield-curve-chart";
 import { MarketRates } from "@/components/dashboard/market-rates";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { ArrowLeft } from "lucide-react";
 import type { TreasuryYield } from "@/lib/types";
 
@@ -42,9 +43,10 @@ export default function DemoPage() {
               <h1 className="text-2xl font-bold">Treasury Yield Demo</h1>
             </div>
             <div className="flex items-center gap-2">
-              <div className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
+              <div className="rounded-full bg-green-100 dark:bg-green-900 px-3 py-1 text-xs font-medium text-green-800 dark:text-green-200">
                 Demo Mode
               </div>
+              <ThemeToggle />
               <Button asChild>
                 <Link href="/login">Get Started</Link>
               </Button>

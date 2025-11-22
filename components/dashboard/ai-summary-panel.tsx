@@ -22,7 +22,7 @@ export function AISummaryPanel({ yields }: AISummaryPanelProps) {
     setIsLoading(true)
     setError("")
     try {
-      const res = await fetch("/api/ai/summarize", {
+      const res = await fetch("https://rvscg1wvg5.execute-api.us-east-1.amazonaws.com/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ yields }),

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { TrendingUp, BarChart3, Sparkles, Shield } from "lucide-react";
 
 export default function HomePage() {
@@ -17,6 +18,7 @@ export default function HomePage() {
                             Real-time U.S. Treasury yield analysis powered by AI. Track yield curves, analyze trends, and get intelligent summaries from the Federal Reserve Economic Data.
                         </p>
                         <div className="mt-10 flex items-center justify-center gap-4">
+                            <ThemeToggle />
                             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
                                 <Link href="/login">Get Started</Link>
                             </Button>

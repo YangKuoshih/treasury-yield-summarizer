@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { YieldCurveChart } from "@/components/dashboard/yield-curve-chart";
 import { MarketRates } from "@/components/dashboard/market-rates";
 import { AISummaryPanel } from "@/components/dashboard/ai-summary-panel";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { RefreshCw, LogOut } from "lucide-react";
 import type { TreasuryYield } from "@/lib/types";
+
+const API_BASE = "https://rvscg1wvg5.execute-api.us-east-1.amazonaws.com";
 
 export default function DashboardPage() {
   const [yields, setYields] = useState<TreasuryYield[]>([]);
@@ -18,13 +21,11 @@ export default function DashboardPage() {
       setIsLoading(true);
       setError("");
       
-      const response = await fetch("/api/treasury/yields");
-      if (!response.ok) {
-        throw new Error("Failed to fetch yield data");
-      }
+      const response = await fetch(`${API_BASE}/fetch-yields`, { method: "POST" });
+      if (!response.ok) throw new Error("Failed to fetch yield data");
       
       const data = await response.json();
-      setYields(data.yields || []);
+      setYields(data.data?.yields || []);
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
       setError("Failed to load Treasury yield data. Please try again.");
@@ -53,6 +54,7 @@ export default function DashboardPage() {
               )}
             </div>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Button
                 variant="outline"
                 size="sm"
