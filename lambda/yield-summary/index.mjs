@@ -3,8 +3,10 @@ import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedroc
 const client = new BedrockRuntimeClient({ region: "us-east-1" });
 
 export const handler = async (event) => {
+    console.log("Event:", JSON.stringify(event));
     try {
         const body = JSON.parse(event.body || "{}");
+        console.log("Body:", JSON.stringify(body));
         const yieldData = body.yield;
 
         if (!yieldData) {
@@ -61,13 +63,15 @@ Keep each point concise and actionable.`;
         };
 
         const command = new InvokeModelCommand({
-            modelId: process.env.MODEL_ID || "anthropic.claude-4-5-sonnet-20250220-v1:0",
+            modelId: process.env.MODEL_ID || "anthropic.claude-sonnet-4-5-20250929-v1:0",
             body: JSON.stringify(payload)
         });
 
         const response = await client.send(command);
         const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+        console.log("Bedrock response:", JSON.stringify(responseBody));
         const aiText = responseBody.content[0].text;
+        console.log("AI Text:", aiText);
 
         // Parse bullet points from AI response
         const bulletPoints = aiText
@@ -94,6 +98,7 @@ Keep each point concise and actionable.`;
         };
     } catch (error) {
         console.error("Error:", error);
+        console.error("Error stack:", error.stack);
         return {
             statusCode: 500,
             headers: {
@@ -101,7 +106,7 @@ Keep each point concise and actionable.`;
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Methods": "POST, OPTIONS"
             },
-            body: JSON.stringify({ error: "Internal Server Error", details: error.message }),
+            body: JSON.stringify({ error: "Internal Server Error", details: error.message, stack: error.stack }),
         };
     }
 };

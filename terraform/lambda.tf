@@ -188,7 +188,7 @@ resource "aws_lambda_function" "yield_summary" {
 
   environment {
     variables = {
-      MODEL_ID = "anthropic.claude-4-5-sonnet-20250220-v1:0"
+      MODEL_ID = "anthropic.claude-sonnet-4-5-20250929-v1:0"
     }
   }
 }
