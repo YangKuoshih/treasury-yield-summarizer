@@ -72,9 +72,12 @@ Keep each point concise and actionable.`;
         // Parse bullet points from AI response
         const bulletPoints = aiText
             .split('\n')
-            .filter(line => line.trim().match(/^[\d\-\•\*]/))
+            .filter(line => line.trim().length > 0 && line.trim().match(/^[\d\-\•\*]/))
             .map(line => line.replace(/^[\d\-\•\*\.\)]\s*/, '').trim())
             .filter(line => line.length > 0);
+        
+        // If no bullet points found, split by sentences
+        const finalPoints = bulletPoints.length > 0 ? bulletPoints : aiText.split('.').filter(s => s.trim().length > 20).slice(0, 5);
 
         return {
             statusCode: 200,
@@ -85,7 +88,7 @@ Keep each point concise and actionable.`;
             },
             body: JSON.stringify({
                 news: news,
-                economicSummary: bulletPoints.slice(0, 5),
+                economicSummary: finalPoints.slice(0, 5),
                 generatedAt: new Date().toISOString()
             }),
         };
