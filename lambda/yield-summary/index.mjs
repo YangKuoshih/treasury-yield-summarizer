@@ -63,7 +63,7 @@ Keep each point concise and actionable.`;
         };
 
         const command = new InvokeModelCommand({
-            modelId: process.env.MODEL_ID || "anthropic.claude-sonnet-4-5-20250929-v1:0",
+            modelId: process.env.MODEL_ID || "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
             body: JSON.stringify(payload)
         });
 

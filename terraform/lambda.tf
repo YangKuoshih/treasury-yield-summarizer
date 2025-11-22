@@ -49,7 +49,7 @@ resource "aws_iam_policy" "lambda_policy" {
           "bedrock:InvokeModel"
         ]
         Resource = [
-          "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0",
+          "arn:aws:bedrock:us-east-1:622957194063:inference-profile/us.anthropic.claude-sonnet-4-5-20250929-v1:0",
           "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0"
         ]
       }
@@ -189,7 +189,7 @@ resource "aws_lambda_function" "yield_summary" {
 
   environment {
     variables = {
-      MODEL_ID = "anthropic.claude-sonnet-4-5-20250929-v1:0"
+      MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
     }
   }
 }
