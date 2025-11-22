@@ -1,6 +1,10 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 
 const client = new BedrockRuntimeClient({ region: "us-east-1" });
+const dbClient = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(dbClient);
 
 export const handler = async (event) => {
     try {
@@ -15,10 +19,32 @@ export const handler = async (event) => {
         }
 
         const modelId = process.env.MODEL_ID;
+        const newsTableName = process.env.NEWS_TABLE_NAME;
+        let newsContext = "No recent news available.";
+
+        if (newsTableName) {
+            try {
+                const today = new Date().toISOString().split("T")[0];
+                const newsResponse = await docClient.send(new GetCommand({
+                    TableName: newsTableName,
+                    Key: { date: today, type: "news" }
+                }));
+
+                if (newsResponse.Item && newsResponse.Item.newsItems) {
+                    const items = newsResponse.Item.newsItems.map(n => `- ${n.title} (${n.source})`).join("\n");
+                    newsContext = `Recent News Headlines:\n${items}`;
+                }
+            } catch (err) {
+                console.error("Failed to fetch news:", err);
+            }
+        }
 
         const prompt = `
     Analyze the following U.S. Treasury yield curve data:
     ${JSON.stringify(yields, null, 2)}
+
+    Contextualize this with the following recent news headlines:
+    ${newsContext}
 
     Provide a JSON response with the following fields:
     1. "marketCondition": One of "normal", "inverted", "flat", or "steep".

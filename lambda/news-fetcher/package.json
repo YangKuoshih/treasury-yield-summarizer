@@ -1,10 +1,10 @@
 {
-    "name": "ai-summarizer",
+    "name": "news-fetcher",
     "version": "1.0.0",
-    "main": "index.mjs",
     "type": "module",
+    "main": "index.mjs",
     "dependencies": {
-        "@aws-sdk/client-bedrock-runtime": "^3.0.0",
+        "duck-duck-scrape": "^2.2.5",
         "@aws-sdk/client-dynamodb": "^3.0.0",
         "@aws-sdk/lib-dynamodb": "^3.0.0"
     }

@@ -1,6 +1,13 @@
 resource "aws_apigatewayv2_api" "http_api" {
   name          = "${var.project_name}-api"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins = ["https://${aws_cloudfront_distribution.s3_distribution.domain_name}"]
+    allow_methods = ["GET", "POST", "OPTIONS"]
+    allow_headers = ["Content-Type", "Authorization"]
+    max_age       = 300
+  }
 }
 
 resource "aws_apigatewayv2_stage" "default" {

@@ -39,7 +39,8 @@ resource "aws_iam_policy" "lambda_policy" {
         Resource = [
           aws_dynamodb_table.users.arn,
           aws_dynamodb_table.sessions.arn,
-          aws_dynamodb_table.yield_data.arn
+          aws_dynamodb_table.yield_data.arn,
+          aws_dynamodb_table.news.arn
         ]
       },
       {
@@ -100,7 +101,8 @@ resource "aws_lambda_function" "ai_summarizer" {
 
   environment {
     variables = {
-      MODEL_ID = "anthropic.claude-4-5-sonnet-20250220-v1:0"
+      MODEL_ID        = "anthropic.claude-4-5-sonnet-20250220-v1:0"
+      NEWS_TABLE_NAME = aws_dynamodb_table.news.name
     }
   }
 }
@@ -124,4 +126,47 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
   function_name = aws_lambda_function.yield_fetcher.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.daily_fetch.arn
+}
+
+data "archive_file" "news_fetcher_zip" {
+  type        = "zip"
+  source_dir  = "${path.module}/../lambda/news-fetcher"
+  output_path = "${path.module}/news-fetcher.zip"
+}
+
+resource "aws_lambda_function" "news_fetcher" {
+  filename         = data.archive_file.news_fetcher_zip.output_path
+  function_name    = "${var.project_name}-news-fetcher"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "index.handler"
+  source_code_hash = data.archive_file.news_fetcher_zip.output_base64sha256
+  runtime          = "nodejs20.x"
+  timeout          = 60
+
+  environment {
+    variables = {
+      TABLE_NAME = aws_dynamodb_table.news.name
+    }
+  }
+}
+
+# EventBridge Schedule for News Fetcher (Daily at 6:05 PM EST)
+resource "aws_cloudwatch_event_rule" "daily_news_fetch" {
+  name                = "${var.project_name}-daily-news-fetch"
+  description         = "Fires daily at 6:05 PM EST"
+  schedule_expression = "cron(5 23 * * ? *)"
+}
+
+resource "aws_cloudwatch_event_target" "news_fetch_target" {
+  rule      = aws_cloudwatch_event_rule.daily_news_fetch.name
+  target_id = "lambda"
+  arn       = aws_lambda_function.news_fetcher.arn
+}
+
+resource "aws_lambda_permission" "allow_cloudwatch_news" {
+  statement_id  = "AllowExecutionFromCloudWatchNews"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.news_fetcher.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.daily_news_fetch.arn
 }

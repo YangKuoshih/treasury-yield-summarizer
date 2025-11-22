@@ -1,6 +1,9 @@
 resource "aws_amplify_app" "nextjs_app" {
-  name       = var.project_name
-  repository = var.github_repo
+  name         = var.project_name
+  repository   = var.github_repo
+  access_token = var.github_token
+  iam_service_role_arn = aws_iam_role.amplify_role.arn
+  platform     = "WEB_COMPUTE"
 
   # The following build_spec is a default for Next.js. 
   # Amplify Hosting often auto-detects this, but explicit config is safer.

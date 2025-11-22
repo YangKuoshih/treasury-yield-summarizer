@@ -21,3 +21,9 @@ variable "github_repo" {
   type        = string
   default     = "https://github.com/YangKuoshih/treasury-yield-summarizer"
 }
+
+variable "github_token" {
+  description = "GitHub Personal Access Token for Amplify"
+  type        = string
+  sensitive   = true
+}
