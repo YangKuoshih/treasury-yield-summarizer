@@ -11,9 +11,10 @@ interface YieldCurveChartProps {
   data: TreasuryYield[]
   date: string
   isLoading?: boolean
+  onSelectYield?: (yieldData: TreasuryYield) => void
 }
 
-export function YieldCurveChart({ data, date, isLoading }: YieldCurveChartProps) {
+export function YieldCurveChart({ data, date, isLoading, onSelectYield }: YieldCurveChartProps) {
   const chartData = useMemo(() => {
     const order = ["1 Mo", "2 Mo", "3 Mo", "6 Mo", "1 Yr", "2 Yr", "3 Yr", "5 Yr", "7 Yr", "10 Yr", "20 Yr", "30 Yr"];
     return data
@@ -24,6 +25,14 @@ export function YieldCurveChart({ data, date, isLoading }: YieldCurveChartProps)
         order: index
       }));
   }, [data])
+
+  const yAxisDomain = useMemo(() => {
+    if (chartData.length === 0) return [0, 5];
+    const yields = chartData.map(d => d.yield);
+    const maxYield = Math.max(...yields);
+    const padding = maxYield * 0.10; // 10% padding on top
+    return [0, maxYield + padding];
+  }, [chartData]);
 
   const isInverted = useMemo(() => {
     if (data.length < 2) return false
@@ -41,7 +50,7 @@ export function YieldCurveChart({ data, date, isLoading }: YieldCurveChartProps)
   }
 
   return (
-    <Card className="col-span-2">
+    <Card className="col-span-2 h-full glass border-white/20">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -65,25 +74,61 @@ export function YieldCurveChart({ data, date, isLoading }: YieldCurveChartProps)
               color: "hsl(var(--chart-1))",
             },
           }}
-          className="h-[300px] w-full"
+          className="h-[400px] w-full"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="maturity" tickLine={false} axisLine={false} tickMargin={10} />
+            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="oklch(0.4 0 0)" className="dark:stroke-[oklch(0.4_0_0)]" />
+              <XAxis
+                dataKey="maturity"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={10}
+                tick={{ fill: "currentColor" }}
+                className="text-muted-foreground"
+              />
               <YAxis
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `${value}%`}
-                domain={["auto", "auto"]}
+                tickFormatter={(value) => `${value.toFixed(2)}%`}
+                domain={yAxisDomain}
+                tick={{ fill: "currentColor" }}
+                className="text-muted-foreground"
               />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Line
                 type="monotone"
                 dataKey="yield"
-                strokeWidth={2}
-                activeDot={{ r: 6 }}
-                stroke="var(--color-primary)"
+                strokeWidth={3}
+                activeDot={{
+                  r: 8,
+                  onClick: (props: any) => {
+                    if (onSelectYield && props.payload) {
+                      // Recharts payload structure usually contains the data item directly or in payload.payload
+                      const item = props.payload;
+                      const yieldItem = data.find(d => d.maturity === item.maturity);
+                      if (yieldItem) {
+                        onSelectYield(yieldItem);
+                      }
+                    }
+                  },
+                  cursor: 'pointer'
+                }}
+                stroke="hsl(var(--chart-1))"
+                dot={{
+                  fill: "oklch(var(--chart-1))",
+                  r: 4,
+                  onClick: (props: any) => {
+                    if (onSelectYield && props.payload) {
+                      const item = props.payload;
+                      const yieldItem = data.find(d => d.maturity === item.maturity);
+                      if (yieldItem) {
+                        onSelectYield(yieldItem);
+                      }
+                    }
+                  },
+                  cursor: 'pointer'
+                }}
               />
             </LineChart>
           </ResponsiveContainer>

@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Auth routes (redirect to dashboard if already logged in)
-  if (pathname === "/login" || pathname === "/register") {
+  if (pathname === "/login" || pathname === "/signup") {
     if (sessionUser) {
       return NextResponse.redirect(new URL("/dashboard", request.url))
     }
@@ -23,5 +23,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register"],
+  matcher: ["/dashboard/:path*", "/login", "/signup"],
 }

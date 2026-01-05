@@ -10,8 +10,11 @@ export const handler = async (event) => {
     try {
         const body = JSON.parse(event.body || "{}");
         const yields = body.yields;
+        const focus = body.focus; // Optional: Specific maturity to focus on
+        const additionalContext = body.additionalContext; // Optional: News or other context from frontend
 
-        if (!yields || !Array.isArray(yields) || yields.length === 0) {
+        // Allow request if either yields OR focus/context is provided
+        if ((!yields || !Array.isArray(yields)) && !additionalContext) {
             return {
                 statusCode: 400,
                 headers: {
@@ -19,7 +22,7 @@ export const handler = async (event) => {
                     "Access-Control-Allow-Headers": "Content-Type",
                     "Access-Control-Allow-Methods": "POST, OPTIONS"
                 },
-                body: JSON.stringify({ error: "Invalid yield data provided" }),
+                body: JSON.stringify({ error: "Invalid data provided. specific 'yields' array or 'additionalContext' is required." }),
             };
         }
 
@@ -27,7 +30,10 @@ export const handler = async (event) => {
         const newsTableName = process.env.NEWS_TABLE_NAME;
         let newsContext = "No recent news available.";
 
-        if (newsTableName) {
+        // If frontend provides context, use it. Otherwise fetch from DB if table name exists.
+        if (additionalContext) {
+            newsContext = additionalContext;
+        } else if (newsTableName) {
             try {
                 const today = new Date().toISOString().split("T")[0];
                 const newsResponse = await docClient.send(new GetCommand({
@@ -44,16 +50,24 @@ export const handler = async (event) => {
             }
         }
 
-        const prompt = `
-    Analyze the following U.S. Treasury yield curve data:
-    ${JSON.stringify(yields, null, 2)}
+        let promptData = "";
+        if (yields) {
+            promptData += `Analyze the following U.S. Treasury yield curve data:\n${JSON.stringify(yields, null, 2)}\n\n`;
+        }
 
-    Contextualize this with the following recent news headlines:
+        if (focus) {
+            promptData += `FOCUS SPECIFICALLY on this data point: ${JSON.stringify(focus)}\n\n`;
+        }
+
+        const prompt = `
+    ${promptData}
+
+    Contextualize this with the following recent news/context:
     ${newsContext}
 
     Provide a JSON response with the following fields:
     1. "marketCondition": One of "normal", "inverted", "flat", or "steep".
-    2. "summary": A concise paragraph (2-3 sentences) summarizing the current state of the yield curve and what it implies for the economy.
+    2. "summary": A concise paragraph (2-3 sentences) summarizing the current state (or the specific focus point) and what it implies for the economy.
     3. "keyInsights": An array of 3 short, bullet-point style insights.
 
     Do not include any markdown formatting or explanations outside the JSON.
@@ -88,9 +102,15 @@ export const handler = async (event) => {
         try {
             const jsonMatch = contentText.match(/\{[\s\S]*\}/);
             jsonResponse = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(contentText);
+            console.log("Parsed AI Response:", JSON.stringify(jsonResponse, null, 2));
         } catch (e) {
             console.error("Failed to parse JSON from model response:", contentText);
             throw new Error("Invalid response format from AI model");
+        }
+
+        // Ensure keyInsights is an array
+        if (!jsonResponse.keyInsights || !Array.isArray(jsonResponse.keyInsights)) {
+            jsonResponse.keyInsights = [];
         }
 
         return {

@@ -11,7 +11,7 @@ interface YieldSpecificSummaryProps {
 }
 
 interface NewsSummary {
-  news: Array<{ title: string; url: string; source: string }>
+  news: Array<{ title: string; url: string; source: string; description: string }>
   economicSummary: string[]
   generatedAt: string
 }
@@ -54,7 +54,7 @@ export function YieldSpecificSummary({ selectedYield }: YieldSpecificSummaryProp
 
   if (!selectedYield) {
     return (
-      <Card className="border-dashed">
+      <Card className="border-dashed glass border-white/20">
         <CardContent className="flex h-[300px] items-center justify-center text-center">
           <div className="text-muted-foreground">
             <Sparkles className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -66,7 +66,7 @@ export function YieldSpecificSummary({ selectedYield }: YieldSpecificSummaryProp
   }
 
   return (
-    <Card className="border-primary/20 bg-primary/5">
+    <Card className="glass border-white/20">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -113,7 +113,8 @@ export function YieldSpecificSummary({ selectedYield }: YieldSpecificSummaryProp
                     <ExternalLink className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
                     <div className="flex-1">
                       <p className="font-medium">{item.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{item.source}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Source: {item.source}</p>
                     </div>
                   </a>
                 ))}

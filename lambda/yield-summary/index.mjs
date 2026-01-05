@@ -1,8 +1,14 @@
 import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
+import axios from "axios";
 
-const client = new BedrockRuntimeClient({ region: "us-east-1" });
+const REGION = "us-east-1";
+const client = new BedrockRuntimeClient({ 
+    region: REGION,
+    requestHandler: { requestTimeout: 90000 }
+});
 
 export const handler = async (event) => {
+    console.log("Using region:", REGION);
     console.log("Event:", JSON.stringify(event));
     try {
         const body = JSON.parse(event.body || "{}");
@@ -21,35 +27,49 @@ export const handler = async (event) => {
             };
         }
 
-        // Mock news data (DuckDuckGo scraping is complex, using mock for now)
-        const news = [
-            {
-                title: `${yieldData.maturity} Treasury Yields Signal Market Shift`,
-                url: "https://www.example.com/news1",
-                source: "Financial Times"
-            },
-            {
-                title: `Bond Market Reacts to ${yieldData.maturity} Rate Changes`,
-                url: "https://www.example.com/news2",
-                source: "Bloomberg"
-            },
-            {
-                title: `Investors Eye ${yieldData.maturity} Treasury Performance`,
-                url: "https://www.example.com/news3",
-                source: "Reuters"
-            }
-        ];
+        // Fetch real news from Google News RSS
+        const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        let news = [];
+        let newsContext = '';
+        
+        try {
+            const searchQuery = `treasury yield ${yieldData.maturity}`;
+            const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(searchQuery)}&hl=en-US&gl=US&ceid=US:en`;
+            const response = await axios.get(rssUrl, { timeout: 10000 });
+            
+            // Parse RSS XML to extract news items with descriptions
+            const items = response.data.match(/<item>([\s\S]*?)<\/item>/g) || [];
+            news = items.slice(0, 3).map(item => {
+                const title = item.match(/<title><!\[CDATA\[(.+?)\]\]><\/title>/)?.[1] || 'News Article';
+                const link = item.match(/<link>(.+?)<\/link>/)?.[1] || '#';
+                const source = item.match(/<source[^>]*>(.+?)<\/source>/)?.[1] || 'News';
+                const description = item.match(/<description><!\[CDATA\[(.+?)\]\]><\/description>/)?.[1]?.replace(/<[^>]*>/g, '').substring(0, 200) || 'Treasury yield market update';
+                return { title, url: link, source, description };
+            });
+            
+            // Create news context for AI
+            newsContext = news.length > 0 
+                ? `\n\nRecent news headlines about treasury yields:\n${news.map(n => `- ${n.title}`).join('\n')}`
+                : '';
+        } catch (err) {
+            console.error('News fetch failed:', err.message);
+            news = [
+                { title: `${yieldData.maturity} Treasury Yield at ${yieldData.yield}%`, url: '#', source: 'Current Data', description: 'Current treasury yield data' }
+            ];
+        }
 
-        // Generate AI summary
-        const prompt = `Analyze the ${yieldData.maturity} U.S. Treasury yield currently at ${yieldData.yield}%.
+        // Generate AI summary with current date and news context
+        const prompt = `Today is ${today}. Analyze the ${yieldData.maturity} U.S. Treasury yield currently at ${yieldData.yield}% as of today.${newsContext}
 
-Provide 4-5 bullet points covering:
-1. What this yield level indicates about market sentiment
-2. Historical context (is this high/low/normal)
-3. Economic implications for this specific maturity
-4. What investors should consider
+Provide exactly 5 complete bullet points. Each bullet point must be 2-3 sentences long and fully complete.
 
-Keep each point concise and actionable.`;
+1. Current Market Sentiment: What this ${yieldData.yield}% yield level indicates about market sentiment today (reference news if relevant)
+2. Historical Context: Is this high/low/normal compared to recent trends and historical averages
+3. Economic Implications: Specific impacts on borrowing costs, housing, corporate debt, and the broader economy for this maturity
+4. Investor Considerations: What investors should consider given today's rate and current news
+5. Portfolio Action: Specific actionable recommendations for investors
+
+Ensure each point is complete with full sentences. Do not cut off mid-sentence.`;
 
         const payload = {
             anthropic_version: "bedrock-2023-05-31",

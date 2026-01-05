@@ -49,9 +49,8 @@ resource "aws_iam_policy" "lambda_policy" {
           "bedrock:InvokeModel"
         ]
         Resource = [
-          "arn:aws:bedrock:us-east-1:622957194063:inference-profile/us.anthropic.claude-sonnet-4-5-20250929-v1:0",
-          "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0",
-          "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0"
+          "arn:aws:bedrock:*::foundation-model/*",
+          "arn:aws:bedrock:*:622957194063:inference-profile/*"
         ]
       }
     ]
@@ -103,7 +102,7 @@ resource "aws_lambda_function" "ai_summarizer" {
 
   environment {
     variables = {
-      MODEL_ID        = "anthropic.claude-4-5-sonnet-20250220-v1:0"
+      MODEL_ID        = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
       NEWS_TABLE_NAME = aws_dynamodb_table.news.name
     }
   }
@@ -186,11 +185,35 @@ resource "aws_lambda_function" "yield_summary" {
   handler          = "index.handler"
   source_code_hash = data.archive_file.yield_summary_zip.output_base64sha256
   runtime          = "nodejs20.x"
-  timeout          = 60
+  timeout          = 120
 
   environment {
     variables = {
       MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+      NEWS_API_KEY = "6c8e7f4a5d3b4c9e8f7a6b5c4d3e2f1a"
     }
   }
 }
+
+data "archive_file" "yield_news_fetcher_zip" {
+  type        = "zip"
+  source_dir  = "${path.module}/../lambda/yield-news-fetcher"
+  output_path = "${path.module}/yield-news-fetcher.zip"
+}
+
+resource "aws_lambda_function" "yield_news_fetcher" {
+  filename         = data.archive_file.yield_news_fetcher_zip.output_path
+  function_name    = "${var.project_name}-yield-news-fetcher"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "index.handler"
+  source_code_hash = data.archive_file.yield_news_fetcher_zip.output_base64sha256
+  runtime          = "nodejs20.x"
+  timeout          = 30
+
+  environment {
+    variables = {
+      NODE_ENV = "production"
+    }
+  }
+}
+
