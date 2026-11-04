@@ -4,5 +4,8 @@
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.0.0"
+  },
+  "overrides": {
+    "fast-xml-parser": "^5.3.5"
   }
 }
